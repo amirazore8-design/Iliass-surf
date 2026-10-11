@@ -1,6 +1,6 @@
 name: Build Android APK
 
-on:
+'on':
 workflow_dispatch:
 
 permissions:
@@ -9,39 +9,34 @@ contents: read
 jobs:
 build:
 runs-on: ubuntu-latest
-
 steps:
-  - name: Checkout repository
-    uses: actions/checkout@v4
+- name: Checkout repository
+uses: actions/checkout@v4
 
   - name: Check source code
-    run: |
-      echo "Verification du depot..."
-      find . -maxdepth 4 -name gradlew -type f
+    run: find . -maxdepth 5 -name gradlew -type f
 
   - name: Set up Java
     uses: actions/setup-java@v4
     with:
       distribution: temurin
-      java-version: "21"
+      java-version: '21'
 
   - name: Build APK
     run: |
       GRADLEW=$(find . -maxdepth 5 -name gradlew -type f | head -n 1)
       if [ -z "$GRADLEW" ]; then
-        echo "ERREUR : le code source Android est absent du depot."
+        echo "Code source Android absent du depot."
         exit 1
       fi
-      PROJECT_DIR=$(dirname "$GRADLEW")
       chmod +x "$GRADLEW"
+      PROJECT_DIR=$(dirname "$GRADLEW")
       cd "$PROJECT_DIR"
-      "$GITHUB_WORKSPACE/$GRADLEW" --no-daemon assembleDebug
+      ./gradlew --no-daemon assembleDebug
 
   - name: Upload APK
-    if: success()
     uses: actions/upload-artifact@v4
     with:
       name: Iliass-surf-debug-apk
-      path: |
-        **/build/outputs/apk/debug/*.apk
+      path: '**/build/outputs/apk/debug/*.apk'
       if-no-files-found: error
